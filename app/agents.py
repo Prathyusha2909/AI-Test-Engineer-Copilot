@@ -9,6 +9,7 @@ from app.domain import (
     DebugSession,
     LogEvidence,
     LogFinding,
+    LLMInsight,
     MCPObservation,
     ReportBundle,
     RiskSignal,
@@ -390,8 +391,16 @@ class ReportGeneratorAgent:
         log_finding: LogFinding,
         observations: list[MCPObservation],
         debugging: DebugSession,
+        llm_insight: LLMInsight,
     ) -> ReportBundle:
-        markdown = build_markdown_report(test_plan, predictions, log_finding, observations, debugging)
+        markdown = build_markdown_report(
+            test_plan,
+            predictions,
+            log_finding,
+            observations,
+            debugging,
+            llm_insight,
+        )
         return ReportBundle(markdown=markdown, html=markdown_to_html(markdown))
 
 
@@ -485,6 +494,7 @@ def build_markdown_report(
     log_finding: LogFinding,
     observations: list[MCPObservation],
     debugging: DebugSession,
+    llm_insight: LLMInsight,
 ) -> str:
     lines = [
         "# AI Test Engineer Copilot Report",
@@ -550,6 +560,29 @@ def build_markdown_report(
             ]
         )
 
+    lines.extend(["## LLM Engineering Review", ""])
+    if llm_insight.enabled:
+        lines.extend(
+            [
+                f"- Provider: {llm_insight.provider}",
+                f"- Model: {llm_insight.model}",
+                f"- Summary: {llm_insight.executive_summary}",
+                f"- Root cause rationale: {llm_insight.root_cause_rationale}",
+                f"- Confidence note: {llm_insight.confidence_note}",
+                "",
+                "### Additional Tests",
+                "",
+            ]
+        )
+        for test in llm_insight.additional_tests:
+            lines.append(f"- {test}")
+        lines.extend(["", "### Recommended Fix Order", ""])
+        for action in llm_insight.recommended_fix_order:
+            lines.append(f"- {action}")
+    else:
+        lines.append(f"- Status: {llm_insight.confidence_note}")
+
+    lines.append("")
     lines.extend(["## Recommended Fixes and Next Tests", ""])
     for action in debugging.recommended_actions:
         lines.append(f"- {action}")

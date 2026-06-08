@@ -61,12 +61,14 @@ function renderResult(result) {
   document.querySelector("#testCount").textContent = result.test_plan.length;
   document.querySelector("#riskCount").textContent = result.failure_predictions.length;
   document.querySelector("#toolCount").textContent = result.mcp_observations.length;
+  document.querySelector("#llmStatus").textContent = result.llm_insight.enabled ? "ON" : "OFF";
   document.querySelector("#rootCause").textContent = result.debugging.consensus_root_cause;
 
   renderTestPlan(result.test_plan);
   renderFailurePredictions(result.failure_predictions);
   renderLogAnalysis(result.log_analysis, result.mcp_observations);
   renderDebugging(result.debugging);
+  renderLLMReview(result.llm_insight);
   updateBoard(result);
 }
 
@@ -146,6 +148,49 @@ function renderDebugging(debugging) {
   }
   actions.append(list);
   container.append(actions);
+}
+
+function renderLLMReview(insight) {
+  const container = document.querySelector("#llmReview");
+  container.replaceChildren();
+
+  if (!insight.enabled) {
+    container.append(createItem("LLM Disabled", insight.confidence_note));
+    return;
+  }
+
+  const summary = createItem(`${insight.provider} / ${insight.model}`, insight.executive_summary);
+  summary.append(createBadgeRow(["LLM enabled"]));
+  container.append(summary);
+  container.append(createItem("Root Cause Rationale", insight.root_cause_rationale));
+
+  const tests = document.createElement("div");
+  tests.className = "item";
+  const testTitle = document.createElement("h3");
+  testTitle.textContent = "Additional Tests";
+  tests.append(testTitle);
+  const testList = document.createElement("ul");
+  for (const test of insight.additional_tests) {
+    const li = document.createElement("li");
+    li.textContent = test;
+    testList.append(li);
+  }
+  tests.append(testList);
+  container.append(tests);
+
+  const fixes = document.createElement("div");
+  fixes.className = "item";
+  const fixTitle = document.createElement("h3");
+  fixTitle.textContent = "Recommended Fix Order";
+  fixes.append(fixTitle);
+  const fixList = document.createElement("ul");
+  for (const fix of insight.recommended_fix_order) {
+    const li = document.createElement("li");
+    li.textContent = fix;
+    fixList.append(li);
+  }
+  fixes.append(fixList);
+  container.append(fixes);
 }
 
 function createItem(title, body) {

@@ -73,6 +73,19 @@ class DebugSession:
 
 
 @dataclass
+class LLMInsight:
+    enabled: bool
+    provider: str
+    model: str
+    executive_summary: str
+    root_cause_rationale: str
+    additional_tests: list[str]
+    recommended_fix_order: list[str]
+    confidence_note: str
+    error: str | None = None
+
+
+@dataclass
 class ReportBundle:
     markdown: str
     html: str
@@ -85,6 +98,7 @@ class PipelineResult:
     log_analysis: LogFinding
     mcp_observations: list[MCPObservation]
     debugging: DebugSession
+    llm_insight: LLMInsight
     report: ReportBundle
 
     def to_dict(self) -> dict[str, Any]:
