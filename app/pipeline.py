@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from app.agents import (
     CollaborativeDebuggingAgent,
     FailurePredictionAgent,
@@ -24,6 +26,15 @@ class TestEngineerPipeline:
         self.llm_reviewer = LLMReviewer()
 
     def analyze(self, spec: str, logs: str) -> PipelineResult:
+        if os.environ.get("AI_COPILOT_USE_LANGGRAPH", "").lower() in {"1", "true", "yes"}:
+            try:
+                from app.langgraph_workflow import run_langgraph_workflow
+
+                return run_langgraph_workflow(spec, logs, self.tool_registry, self.llm_reviewer)
+            except Exception:
+                if os.environ.get("AI_COPILOT_LANGGRAPH_STRICT", "").lower() in {"1", "true", "yes"}:
+                    raise
+
         knowledge_base = SimpleRAG.from_documents(
             {
                 "Requirement Specification": spec,

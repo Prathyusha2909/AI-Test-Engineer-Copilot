@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dma_timeout_pcie",
+    "description": "PCIe completion delay causes a DMA timeout and reset failure.",
+    "spec": "Network card with PCIe Gen4 x16, DMA descriptor rings, MSI-X interrupts, packet throughput, reset recovery, and telemetry.",
+    "logs": "INFO pcie: link trained Gen4 x16\nINFO dma: descriptor rings initialized\nWARN traffic: packet drop counter increased\nERROR dma: DMA timeout waiting for completion queue update qid=7\nERROR pcie: completion timeout observed replay counter increased\nFAIL validation: reset recovery failed",
+    "expected": {
+      "root_cause_signature": "dma timeout",
+      "components": ["PCIe Interface", "DMA Engine"],
+      "required_tests": ["PCIe Enumeration and DMA Sanity", "Throughput and Packet Loss", "Reset and Recovery"],
+      "evidence_terms": ["dma timeout", "completion timeout"]
+    }
+  },
+  {
+    "id": "queue_overflow_burst",
+    "description": "Burst traffic saturates packet buffers and descriptor rings.",
+    "spec": "Network card datapath shall tolerate burst traffic, packet buffer pressure, queue overflow recovery, descriptor rings, and packet drop monitoring.",
+    "logs": "INFO traffic: burst profile started\nWARN buffer: ring full on rxq=3\nERROR buffer: queue overflow depth=4096\nERROR driver: descriptor leak suspected after completion\nFAIL validation: packet loss above acceptance threshold",
+    "expected": {
+      "root_cause_signature": "queue overflow",
+      "components": ["Packet Buffer Manager", "Driver"],
+      "required_tests": ["Queue Overflow and Buffer Pressure", "Throughput and Packet Loss"],
+      "evidence_terms": ["queue overflow", "descriptor leak"]
+    }
+  },
+  {
+    "id": "firmware_watchdog",
+    "description": "Firmware state machine enters watchdog loop after invalid rollback.",
+    "spec": "Firmware loader validates images, supports rollback, reports boot-stage marker, and recovers from watchdog reset.",
+    "logs": "INFO fw: primary image validation started\nWARN fw: rollback image mismatch\nERROR fw: firmware crash at boot stage CONTROL_READY\nERROR fw: watchdog reset loop detected\nFAIL validation: firmware recovery failed",
+    "expected": {
+      "root_cause_signature": "firmware state machine",
+      "components": ["Firmware Loader", "Control Plane"],
+      "required_tests": ["Firmware Boot and Recovery", "Reset and Recovery"],
+      "evidence_terms": ["firmware crash", "watchdog"]
+    }
+  },
+  {
+    "id": "phy_signal_integrity",
+    "description": "PHY margin issue causes CRC bursts and link retraining.",
+    "spec": "PHY layer shall expose CRC counters, link retrain events, SerDes lane status, signal integrity telemetry, jitter, and eye margin.",
+    "logs": "INFO phy: lane status nominal\nWARN phy: crc burst detected lane=4\nWARN pcie: link retrain requested\nERROR phy: link flap observed after jitter spike\nFAIL validation: link stability test failed",
+    "expected": {
+      "root_cause_signature": "signal integrity",
+      "components": ["PHY Layer", "PCIe Link"],
+      "required_tests": ["Fault Injection and Diagnostic Reporting"],
+      "evidence_terms": ["crc", "link flap", "jitter"]
+    }
+  },
+  {
+    "id": "thermal_throttle",
+    "description": "Thermal stress triggers throttling before throughput loss.",
+    "spec": "Thermal monitoring shall warn at 85 C, throttle before shutdown, and recover after controlled airflow returns.",
+    "logs": "INFO traffic: line rate started\nWARN thermal: temperature 88C warning threshold crossed\nERROR thermal: overheat throttle asserted\nFAIL validation: throughput degraded during thermal stress",
+    "expected": {
+      "root_cause_signature": "thermal stress",
+      "components": ["Thermal and Power Delivery"],
+      "required_tests": ["Thermal Stress and Throttling"],
+      "evidence_terms": ["thermal", "temperature", "throttle"]
+    }
+  },
+  {
+    "id": "power_rail_droop",
+    "description": "Core rail droop appears during load transition.",
+    "spec": "Power delivery shall monitor voltage rails, brownout events, core voltage rail margin, power faults, and recovery behavior.",
+    "logs": "INFO power: load transition started\nWARN power: core voltage rail droop observed\nERROR power: brownout interrupt asserted\nFAIL validation: power fault during high-load transition",
+    "expected": {
+      "root_cause_signature": "power delivery",
+      "components": ["Power Delivery"],
+      "required_tests": ["Power-On and Rail Validation"],
+      "evidence_terms": ["voltage", "brownout", "power fault"]
+    }
+  },
+  {
+    "id": "mixed_thermal_power_ambiguous",
+    "description": "Ambiguous mixed thermal and power event used to test benchmark sensitivity.",
+    "spec": "Card shall monitor thermal stress, power rail voltage, throttle behavior, and brownout recovery under sustained load.",
+    "logs": "WARN thermal: ASIC temperature 91C\nWARN power: core voltage rail droop observed\nERROR thermal: throttle asserted\nERROR power: power fault latched after throttle\nFAIL validation: sustained load test failed",
+    "expected": {
+      "root_cause_signature": "power delivery",
+      "components": ["Power Delivery", "Thermal and Power Delivery"],
+      "required_tests": ["Power-On and Rail Validation", "Thermal Stress and Throttling"],
+      "evidence_terms": ["power fault", "thermal", "voltage"]
+    }
+  }
+]

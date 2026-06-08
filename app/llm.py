@@ -50,10 +50,17 @@ class LLMConfig:
     @classmethod
     def from_env(cls) -> "LLMConfig":
         disabled = os.environ.get("AI_COPILOT_DISABLE_LLM", "").lower() in {"1", "true", "yes"}
+        provider = os.environ.get("LLM_PROVIDER", "openai").lower()
+        if provider in {"gemini", "google"}:
+            model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+            api_key = os.environ.get("GEMINI_API_KEY", os.environ.get("GOOGLE_API_KEY", ""))
+        else:
+            model = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
+            api_key = os.environ.get("OPENAI_API_KEY", "")
         return cls(
-            provider=os.environ.get("LLM_PROVIDER", "openai"),
-            model=os.environ.get("OPENAI_MODEL", "gpt-4.1-mini"),
-            api_key=os.environ.get("OPENAI_API_KEY", ""),
+            provider=provider,
+            model=model,
+            api_key=api_key,
             disabled=disabled,
         )
 
@@ -73,18 +80,25 @@ class LLMReviewer:
         if self.config.disabled:
             return disabled_insight(self.config, "LLM disabled by AI_COPILOT_DISABLE_LLM.")
 
-        if self.config.provider.lower() != "openai":
+        provider = self.config.provider.lower()
+        if provider not in {"openai", "gemini", "google"}:
             return disabled_insight(self.config, f"Unsupported LLM provider: {self.config.provider}.")
 
         if not self.config.api_key:
-            return disabled_insight(self.config, "Set OPENAI_API_KEY to enable the LLM engineering review.")
+            key_name = "OPENAI_API_KEY" if provider == "openai" else "GEMINI_API_KEY"
+            return disabled_insight(self.config, f"Set {key_name} to enable the LLM engineering review.")
 
+        payload = build_review_payload(test_plan, predictions, log_finding, observations, debugging)
+
+        if provider == "openai":
+            return self._run_openai(payload)
+        return self._run_gemini(payload)
+
+    def _run_openai(self, payload: dict[str, Any]) -> LLMInsight:
         try:
             from openai import OpenAI
         except ImportError:
-            return disabled_insight(self.config, "Install the openai package to enable the LLM layer.")
-
-        payload = build_review_payload(test_plan, predictions, log_finding, observations, debugging)
+            return disabled_insight(self.config, "Install the openai package to enable the OpenAI LLM layer.")
 
         try:
             client = OpenAI(api_key=self.config.api_key)
@@ -121,6 +135,39 @@ class LLMReviewer:
             )
         except Exception as exc:
             return disabled_insight(self.config, f"LLM review failed: {exc}")
+
+    def _run_gemini(self, payload: dict[str, Any]) -> LLMInsight:
+        try:
+            from google import genai
+            from google.genai import types
+        except ImportError:
+            return disabled_insight(self.config, "Install google-genai to enable the Gemini LLM layer.")
+
+        try:
+            client = genai.Client(api_key=self.config.api_key)
+            response = client.models.generate_content(
+                model=self.config.model,
+                contents="Return a JSON engineering review for this validation analysis:\n"
+                + json.dumps(payload, indent=2),
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    response_schema=REVIEW_SCHEMA,
+                ),
+            )
+            parsed = json.loads(str(response.text))
+            return LLMInsight(
+                enabled=True,
+                provider="gemini",
+                model=self.config.model,
+                executive_summary=str(parsed["executive_summary"]),
+                root_cause_rationale=str(parsed["root_cause_rationale"]),
+                additional_tests=[str(item) for item in parsed["additional_tests"]],
+                recommended_fix_order=[str(item) for item in parsed["recommended_fix_order"]],
+                confidence_note=str(parsed["confidence_note"]),
+            )
+        except Exception as exc:
+            return disabled_insight(self.config, f"Gemini review failed: {exc}")
 
 
 def build_review_payload(

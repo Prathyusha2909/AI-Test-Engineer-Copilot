@@ -1,22 +1,43 @@
 # Architecture
 
+```mermaid
+flowchart TD
+    A[Requirement Docs] --> B[Local RAG Retriever]
+    C[Validation Logs] --> B
+    B --> D[Agentic Test Engineer Pipeline]
+    D --> E[Test Plan Agent]
+    D --> F[Failure Prediction Agent]
+    D --> G[Log Analysis Agent]
+    D --> H[MCP Tool Registry]
+    H --> H1[Test Equipment]
+    H --> H2[Oscilloscope]
+    H --> H3[Test Runner]
+    H --> H4[Log Server]
+    E --> I[Collaborative Debugging]
+    F --> I
+    G --> I
+    H --> I
+    I --> J[Optional LLM Review]
+    J --> K[Report Generator]
+    I --> K
+    K --> L[Dashboard + Markdown/HTML Report]
+```
+
+## Optional LangGraph Runtime
+
+The default pipeline is dependency-light and deterministic. For a real agent-orchestration runtime, install optional dependencies and set:
+
+```powershell
+pip install -r requirements-optional.txt
+$env:AI_COPILOT_USE_LANGGRAPH="1"
+python server.py
+```
+
+When enabled, `app/langgraph_workflow.py` runs the same workflow as a LangGraph `StateGraph`:
+
 ```text
-Requirement Docs + Validation Logs
-             |
-             v
-      Simple Local RAG
-             |
-             v
-   AI Test Engineer Pipeline
-             |
-    +--------+---------+---------+----------+
-    |        |         |         |          |
-    v        v         v         v          v
-Test Plan  Failure   MCP Tool   Log       Report
-Agent      Agent     Context    Analyzer  Generator
-                       |
-                       v
-              Multi-Agent Debugging
+build_knowledge -> collect_tools -> generate_tests -> predict_failures
+-> analyze_logs -> debug_failure -> review_with_llm -> generate_report
 ```
 
 ## Agent Responsibilities

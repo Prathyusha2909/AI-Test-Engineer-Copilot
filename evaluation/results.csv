@@ -1,0 +1,8 @@
+case_id,description,expected_root_signature,predicted_root_cause,root_cause_accuracy,component_precision,component_recall,test_plan_coverage,evidence_recall,overall_score
+dma_timeout_pcie,PCIe completion delay causes a DMA timeout and reset failure.,dma timeout,DMA timeout caused by delayed PCIe completions,1,1.0,1.0,1.0,1.0,1.0
+queue_overflow_burst,Burst traffic saturates packet buffers and descriptor rings.,queue overflow,Packet queue overflow under burst traffic,1,1.0,1.0,1.0,1.0,1.0
+firmware_watchdog,Firmware state machine enters watchdog loop after invalid rollback.,firmware state machine,Firmware state machine fault during initialization or recovery,1,1.0,1.0,1.0,1.0,1.0
+phy_signal_integrity,PHY margin issue causes CRC bursts and link retraining.,signal integrity,Signal integrity margin issue causing link instability,1,1.0,1.0,1.0,1.0,1.0
+thermal_throttle,Thermal stress triggers throttling before throughput loss.,thermal stress,Thermal stress triggered throttling and performance degradation,1,1.0,1.0,1.0,1.0,1.0
+power_rail_droop,Core rail droop appears during load transition.,power delivery,Power delivery instability during high-load transition,1,1.0,1.0,1.0,1.0,1.0
+mixed_thermal_power_ambiguous,Ambiguous mixed thermal and power event used to test benchmark sensitivity.,power delivery,Thermal stress triggered throttling and performance degradation,0,1.0,0.5,1.0,1.0,0.7
