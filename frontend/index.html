@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Test Engineer Copilot</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>AI Test Engineer Copilot</h1>
+        <p>Validation dashboard</p>
+      </div>
+      <div class="actions">
+        <button id="loadSample" type="button">Load Sample</button>
+        <button id="runAnalysis" type="button" class="primary">Run Analysis</button>
+        <button id="exportMarkdown" type="button" disabled>Export MD</button>
+        <button id="exportHtml" type="button" disabled>Export HTML</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="input-panel">
+        <div class="field">
+          <label for="specInput">Requirement / Design Spec</label>
+          <textarea id="specInput" spellcheck="false"></textarea>
+        </div>
+        <div class="field">
+          <label for="logInput">Validation Log</label>
+          <textarea id="logInput" spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <section class="status-panel">
+        <div class="metric">
+          <span>Root Cause Confidence</span>
+          <strong id="confidenceValue">--</strong>
+        </div>
+        <div class="metric">
+          <span>Generated Tests</span>
+          <strong id="testCount">--</strong>
+        </div>
+        <div class="metric">
+          <span>Risk Signals</span>
+          <strong id="riskCount">--</strong>
+        </div>
+        <div class="metric">
+          <span>MCP Tool Calls</span>
+          <strong id="toolCount">--</strong>
+        </div>
+      </section>
+
+      <section class="board-section">
+        <div class="board-header">
+          <h2>Card-Level Debug Map</h2>
+          <span id="rootCause">Awaiting analysis</span>
+        </div>
+        <div class="board-map" aria-label="Hardware debug map">
+          <div class="lane lane-a"></div>
+          <div class="lane lane-b"></div>
+          <button class="component phy" data-component="PHY Layer">PHY</button>
+          <button class="component pcie" data-component="PCIe Interface">PCIe</button>
+          <button class="component fw" data-component="Firmware Loader">FW</button>
+          <button class="component buffer" data-component="Packet Buffer Manager">Buffer</button>
+          <button class="component power" data-component="Thermal and Power Delivery">Thermal/Power</button>
+        </div>
+      </section>
+
+      <section class="results-grid">
+        <div class="panel">
+          <h2>Generated Test Plan</h2>
+          <div id="testPlan" class="list"></div>
+        </div>
+        <div class="panel">
+          <h2>Failure Predictions</h2>
+          <div id="failurePredictions" class="list"></div>
+        </div>
+        <div class="panel">
+          <h2>Log Analysis</h2>
+          <div id="logAnalysis" class="list"></div>
+        </div>
+        <div class="panel">
+          <h2>Multi-Agent Debugging</h2>
+          <div id="debugging" class="list"></div>
+        </div>
+      </section>
+    </main>
+
+    <template id="emptyState">
+      <p class="empty">No data yet</p>
+    </template>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

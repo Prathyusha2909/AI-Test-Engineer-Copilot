@@ -1,0 +1,15 @@
+2026-06-05T10:14:02.118Z INFO boot: Falcon-X validation run 42 started
+2026-06-05T10:14:02.641Z INFO pcie: link trained Gen4 x16
+2026-06-05T10:14:03.004Z INFO fw: image signature valid, boot stage CONTROL_READY
+2026-06-05T10:14:05.902Z INFO dma: descriptor rings initialized rx=4096 tx=4096
+2026-06-05T10:15:18.331Z INFO traffic: bidirectional throughput 97.8Gbps port0 97.5Gbps port1
+2026-06-05T10:18:44.012Z WARN thermal: ASIC temperature 87C, warning threshold crossed
+2026-06-05T10:19:12.771Z WARN traffic: packet drop counter increased by 128
+2026-06-05T10:19:12.803Z ERROR dma: DMA timeout waiting for completion queue update qid=7 age_ms=214
+2026-06-05T10:19:12.836Z ERROR pcie: completion timeout observed, replay counter increased
+2026-06-05T10:19:12.901Z WARN buffer: queue overflow on rxq=7 depth=4096
+2026-06-05T10:19:13.044Z FAIL validation: throughput test failed due to packet loss and DMA timeout
+2026-06-05T10:19:13.414Z INFO recovery: software reset issued
+2026-06-05T10:19:15.008Z INFO pcie: link retained Gen4 x16 after reset
+2026-06-05T10:19:16.225Z ERROR dma: completion queue qid=7 stale after reset
+2026-06-05T10:19:18.770Z FAIL validation: reset recovery failed

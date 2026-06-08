@@ -1,0 +1,11 @@
+[project]
+name = "ai-test-engineer-copilot"
+version = "0.1.0"
+description = "Agentic AI copilot for test plan generation, failure prediction, log analysis, and debugging reports."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
